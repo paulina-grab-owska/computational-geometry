@@ -128,3 +128,111 @@ for pt in points:
     de.add_point(pt)
 
 de.visualization()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import triangle
+import matplotlib.pyplot as plt
+import numpy as np
+
+np.random.seed(0)
+punkty = np.random.rand(50, 2)
+
+triangulacja = triangle.triangulate({'vertices': punkty})
+
+fig, ax = plt.subplots()
+ax.triplot(punkty[:,0], punkty[:,1], triangulacja['triangles'], color='pink', alpha=0.5)
+ax.plot(punkty[:,0], punkty[:,1], 'o', color='black', markersize=5)
+ax.set_aspect('equal')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_title('triangulation')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+import triangle
+import seaborn as sns
+
+def time_delaunay(num_points):
+    import random
+    from scipy.spatial import Delaunay
+
+    times = []
+    for N in range(15, num_points):
+        ts = time.time()
+        pts = []
+        for _ in range(N):
+            x = 2 * 10 * (random.random() - 0.5)
+            y = 2 * 10 * (random.random() - 0.5)
+            pts.append((x, y))
+        De = Delaunay(np.array(pts))
+        te = time.time()
+        times.append(te - ts)
+
+    return times
+
+
+def time_triangle(num_points):
+    times = []
+    for N in range(15, num_points):
+        ts = time.time()
+        points = np.random.rand(N, 2)
+        tri = triangle.triangulate({'vertices': points})
+        te = time.time()
+        times.append(te - ts)
+
+    return times
+
+num_points = 1000
+times_delaunay = time_delaunay(num_points)
+times_triangle = time_triangle(num_points)
+
+# wykres skrzypcowy
+plt.figure(figsize=(10, 6))
+sns.violinplot(data=[times_delaunay, times_triangle], palette="Set3")
+plt.title('Porównanie czasów wykonania Bowyer-Watson i Triangle (Better Delaunay)')
+plt.xlabel('Algorytm')
+plt.ylabel('Czas wykonania (s)')
+plt.xticks([0, 1], ['Bowyer-Watson', 'Triangle'])
+plt.grid(True)
+plt.show()
+
+
+# wykres gęstości
+plt.figure(figsize=(10, 6))
+sns.kdeplot(times_delaunay, color='r', label='Bowyer-Watson', shade=True)
+sns.kdeplot(times_triangle, color='b', label='Triangle', shade=True)
+plt.title('Gęstość rozkładu czasów wykonania Bowyer-Watson i Triangle')
+plt.xlabel('Czas wykonania (s)')
+plt.ylabel('Gęstość')
+plt.legend()
+plt.grid(True)
+plt.show()
+
